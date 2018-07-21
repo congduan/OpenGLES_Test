@@ -5,6 +5,7 @@ import android.graphics.SurfaceTexture;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
+import android.opengl.Matrix;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.Size;
@@ -12,6 +13,7 @@ import android.util.Size;
 import com.dc.testopengl.camera.CameraManager;
 import com.dc.testopengl.filter.FilterChain;
 import com.dc.testopengl.filter.TestFilterChain;
+import com.dc.testopengl.test.Triangle;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -47,6 +49,13 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
     private int mFrameCount = 0;
     private static final int FPS_FRAME_INTERVAL = 10;
     private long lastTime = 0L;
+    private Triangle mTriangle;
+    private float[] matrix = {
+            1,0,0,0,
+            0,1,0,0,
+            0,0,1,0,
+            0,0,0,1,
+    };
 
     public CameraRenderer(Context context, GLSurfaceView glView, SurfaceTextureInitCallback callback) {
         mContext = context;
@@ -64,6 +73,7 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
         mOESTextureId = createOESTextureObject();
         mFilterChain.glInit();
         initSurfaceTexture();
+        mTriangle = new Triangle();
     }
 
     @Override
@@ -71,6 +81,7 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
         this.width = width;
         this.height = height;
         Log.i(TAG, "onSurfaceChanged: w=" + width + ", h=" + height);
+        GLES20.glViewport(0,0,width,height);
     }
 
     @Override
@@ -84,9 +95,19 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
             mSurfaceTexture.getTransformMatrix(mTransformMatrix);
         }
 
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
         ((TestFilterChain) mFilterChain).setTransfromMatrix(mTransformMatrix);
         ((TestFilterChain) mFilterChain).setOESTexture(mOESTextureId);
         mFilterChain.onDraw(width, height);
+
+
+        GLES20.glEnable(GLES20.GL_BLEND);
+        GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE);
+        mTriangle.draw(matrix);
+
+        GLES20.glDisable(GLES20.GL_BLEND);
 
         if(lastTime == 0){
             lastTime = timeMillis;
