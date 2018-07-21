@@ -1,4 +1,4 @@
-package com.dc.testopengl;
+package com.dc.testopengl.test;
 
 import android.opengl.GLES20;
 
