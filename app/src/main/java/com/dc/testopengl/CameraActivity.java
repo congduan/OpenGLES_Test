@@ -6,6 +6,7 @@ import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.TextView;
 
 import com.dc.testopengl.camera.CameraCallback;
 import com.dc.testopengl.camera.CameraManager;
@@ -13,6 +14,7 @@ import com.dc.testopengl.camera.CameraManager;
 public class CameraActivity extends Activity {
 
     private GLSurfaceView surfaceView;
+    private TextView mFpsView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,6 +27,7 @@ public class CameraActivity extends Activity {
         setContentView(R.layout.activity_camera);
 
         initGLSurfaceView();
+        mFpsView = findViewById(R.id.fpsText);
 
         CameraManager.getInstance().addCallback(new CameraCallback() {
             @Override
@@ -48,6 +51,16 @@ public class CameraActivity extends Activity {
 
                 CameraManager.getInstance().openInActivity(CameraActivity.this);
                 CameraManager.getInstance().startPreview(surfaceTexture);
+            }
+
+            @Override
+            public void onFpsUpdate(final float fps) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mFpsView.setText("fps: "+fps);
+                    }
+                });
             }
         }));
         surfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);

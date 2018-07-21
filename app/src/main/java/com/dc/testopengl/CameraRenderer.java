@@ -5,9 +5,11 @@ import android.graphics.SurfaceTexture;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
+import android.provider.Settings;
 import android.util.Log;
 
-import com.dc.testopengl.shader.PreviewFilter;
+import com.dc.testopengl.filter.FilterChain;
+import com.dc.testopengl.filter.TestFilterChain;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -18,8 +20,9 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class CameraRenderer implements GLSurfaceView.Renderer {
 
-    public interface SurfaceTextureInitCallback{
+    public interface SurfaceTextureInitCallback {
         void onInit(SurfaceTexture surfaceTexture);
+        void onFpsUpdate(float fps);
     }
 
     private static final String TAG = "congduan";
@@ -36,26 +39,29 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
     private SurfaceTextureInitCallback mCallback;
     private float[] mTransformMatrix = new float[16];
 
-    private PreviewFilter mPreviewFilter;
+    private FilterChain mFilterChain;
+    private float mFps;
+    private int mFrameCount = 0;
+    private static final int FPS_FRAME_INTERVAL = 10;
+    private long lastTime = 0L;
 
     public CameraRenderer(Context context, GLSurfaceView glView, SurfaceTextureInitCallback callback) {
         mContext = context;
         this.mGLSurfaceView = glView;
         this.mCallback = callback;
-        Log.i(TAG, "MyTestRenderer: "+glView.getWidth()+", "+glView.getHeight());
-
-        mPreviewFilter = new PreviewFilter();
+        Log.i(TAG, "MyTestRenderer: " + glView.getWidth() + ", " + glView.getHeight());
     }
 
     @Override
     public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
-        if(mGLSurfaceView == null){
+        if (mGLSurfaceView == null) {
             Log.i(TAG, "onSurfaceCreated: glView is null");
         }
-        Log.i(TAG, "onSurfaceCreated: "+mGLSurfaceView.getWidth()+", "+mGLSurfaceView.getHeight());
+        Log.i(TAG, "onSurfaceCreated: " + mGLSurfaceView.getWidth() + ", " + mGLSurfaceView.getHeight());
 
+        mFilterChain = new TestFilterChain(mGLSurfaceView.getWidth(), mGLSurfaceView.getHeight());
         mOESTextureId = createOESTextureObject();
-        mPreviewFilter.compile();
+        mFilterChain.glInit();
         initSurfaceTexture();
     }
 
@@ -63,11 +69,13 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
     public void onSurfaceChanged(GL10 gl10, int width, int height) {
         this.width = width;
         this.height = height;
-        Log.i(TAG, "onSurfaceChanged: w="+width + ", h="+height);
+        Log.i(TAG, "onSurfaceChanged: w=" + width + ", h=" + height);
     }
 
     @Override
     public void onDrawFrame(GL10 gl) {
+        long timeMillis = System.currentTimeMillis();
+
         if (mSurfaceTexture != null) {
             //更新纹理图像
             mSurfaceTexture.updateTexImage();
@@ -75,7 +83,25 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
             mSurfaceTexture.getTransformMatrix(mTransformMatrix);
         }
 
-        mPreviewFilter.draw(mTransformMatrix, mOESTextureId);
+        ((TestFilterChain) mFilterChain).setTransfromMatrix(mTransformMatrix);
+        ((TestFilterChain) mFilterChain).setOESTexture(mOESTextureId);
+        mFilterChain.onDraw(width, height);
+
+        if(lastTime == 0){
+            lastTime = timeMillis;
+            return;
+        }
+        mFrameCount++;
+        mFps += 1000.0f / (timeMillis - lastTime);
+        if(mFrameCount == FPS_FRAME_INTERVAL){
+            mFps /= FPS_FRAME_INTERVAL;
+            if(mCallback != null){
+                mCallback.onFpsUpdate(mFps);
+            }
+            mFps = 0;
+            mFrameCount = 0;
+        }
+        lastTime = timeMillis;
     }
 
     public static int createOESTextureObject() {
@@ -109,7 +135,7 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
                 mGLSurfaceView.requestRender();
             }
         });
-        if(mCallback != null){
+        if (mCallback != null) {
             mCallback.onInit(mSurfaceTexture);
         }
         return true;
