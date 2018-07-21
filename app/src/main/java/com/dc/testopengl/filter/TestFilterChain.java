@@ -8,14 +8,17 @@ public class TestFilterChain extends FilterChain {
 
     Filter filter1;
     Filter filter2;
+    Filter filter3;
 
-    public TestFilterChain(int width, int height){
+    public TestFilterChain(){
 
-        filter1 = new OES2RGBAFilter(width, height);
-        filter2 = new PreviewFilter(width, height);
+        filter1 = new OES2RGBAFilter();
+        filter2 = new CropFilter();
+        filter3 = new PreviewFilter();
 
         add(filter1);
         add(filter2);
+        add(filter3);
     }
 
     public void setTransfromMatrix(float[] matrix){

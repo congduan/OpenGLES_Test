@@ -7,23 +7,28 @@ package com.dc.testopengl.shader;
 public class BaseShader extends ShaderSource {
 
     private static final String VERTEX_SHADER = "" +
-            "attribute vec4 vPosition; \n" +
-            " \n" +
+            "precision highp float;\n" +
+            "attribute vec4 position;\n" +
+            "attribute vec2 inputTextureCoordinate;\n" +
+            "varying vec2 textureCoordinate;\n" +
             "void main(void)\n" +
             "{\n" +
-            "    gl_Position = vPosition;\n" +
+            "    gl_Position = position;\n" +
+            "    textureCoordinate = inputTextureCoordinate;\n" +
             "}";
 
-
     private static final String FRAGMENT_SHADER = "" +
-            "#extension GL_OES_EGL_image_external : require\n" +
-            "precision mediump float;\n" +
-            "uniform samplerExternalOES uTextureSampler;\n" +
-            "varying vec2 vTextureCoord;\n" +
-            "void main() \n" +
-            "{\n" +
-            "  gl_FragColor = texture2D(uTextureSampler, vTextureCoord);\n" +
-            "}\n";
+            " precision highp float;\n" +
+            " \n" +
+            " varying vec2 textureCoordinate;\n" +
+            " \n" +
+            " uniform sampler2D inputImageTexture;\n" +
+            " \n" +
+            " void main()\n" +
+            " {\n" +
+            "     gl_FragColor = texture2D(inputImageTexture, textureCoordinate);\n" +
+            " }";
+
 
     @Override
     public String getVertexShader() {
@@ -33,6 +38,5 @@ public class BaseShader extends ShaderSource {
     @Override
     public String getFragmentShader() {
         return FRAGMENT_SHADER;
-
     }
 }

@@ -28,9 +28,8 @@ class OES2RGBAFilter extends Filter {
 
     private FloatBuffer mDataBuffer;
 
-    public OES2RGBAFilter(int width, int height) {
+    public OES2RGBAFilter(){
         super(new OESShader());
-        setSize(width, height, width, height);
     }
 
     @Override
@@ -51,13 +50,8 @@ class OES2RGBAFilter extends Filter {
     }
 
     @Override
-    public void process(int inTex, int outTex) {
-        processTexOESToTex2D(inTex, outTex, getInputWidth(), getInputHeight(), getTransformMatrix());
-    }
-
-    @Override
     public void process(int inTex, int outTex, int inputWidth, int inputHeight, int outputWidth, int outputHeight) {
-        processTexOESToTex2D(inTex, outTex, getInputWidth(), getInputHeight(), getTransformMatrix());
+        processTexOESToTex2D(inTex, outTex, outputWidth, outputHeight, getTransformMatrix());
     }
 
     private void processTexOESToTex2D(int mOESTextureId, int outTex, int width, int height, float[] matrix) {

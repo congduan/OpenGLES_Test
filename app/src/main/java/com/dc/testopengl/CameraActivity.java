@@ -45,7 +45,7 @@ public class CameraActivity extends Activity {
     private void initGLSurfaceView() {
         surfaceView = findViewById(R.id.glSurfaceView);
         surfaceView.setEGLContextClientVersion(2);
-        surfaceView.setRenderer(new CameraRenderer(this, surfaceView, new CameraRenderer.SurfaceTextureInitCallback() {
+        CameraRenderer mRenderer = new CameraRenderer(this, surfaceView, new CameraRenderer.SurfaceTextureInitCallback() {
             @Override
             public void onInit(SurfaceTexture surfaceTexture) {
 
@@ -62,7 +62,8 @@ public class CameraActivity extends Activity {
                     }
                 });
             }
-        }));
+        });
+        surfaceView.setRenderer(mRenderer);
         surfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
     }
 

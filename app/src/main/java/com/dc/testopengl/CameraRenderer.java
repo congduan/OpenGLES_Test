@@ -7,7 +7,9 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.provider.Settings;
 import android.util.Log;
+import android.util.Size;
 
+import com.dc.testopengl.camera.CameraManager;
 import com.dc.testopengl.filter.FilterChain;
 import com.dc.testopengl.filter.TestFilterChain;
 
@@ -40,6 +42,7 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
     private float[] mTransformMatrix = new float[16];
 
     private FilterChain mFilterChain;
+
     private float mFps;
     private int mFrameCount = 0;
     private static final int FPS_FRAME_INTERVAL = 10;
@@ -49,7 +52,6 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
         mContext = context;
         this.mGLSurfaceView = glView;
         this.mCallback = callback;
-        Log.i(TAG, "MyTestRenderer: " + glView.getWidth() + ", " + glView.getHeight());
     }
 
     @Override
@@ -57,9 +59,8 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
         if (mGLSurfaceView == null) {
             Log.i(TAG, "onSurfaceCreated: glView is null");
         }
-        Log.i(TAG, "onSurfaceCreated: " + mGLSurfaceView.getWidth() + ", " + mGLSurfaceView.getHeight());
 
-        mFilterChain = new TestFilterChain(mGLSurfaceView.getWidth(), mGLSurfaceView.getHeight());
+        mFilterChain = new TestFilterChain();
         mOESTextureId = createOESTextureObject();
         mFilterChain.glInit();
         initSurfaceTexture();

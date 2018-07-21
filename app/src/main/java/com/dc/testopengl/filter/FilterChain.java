@@ -2,6 +2,8 @@ package com.dc.testopengl.filter;
 
 import android.opengl.GLES20;
 
+import com.dc.testopengl.camera.CameraManager;
+
 import java.util.LinkedList;
 
 /**
@@ -42,19 +44,33 @@ public class FilterChain {
         GLES20.glDeleteTextures(mTempTexture.length, mTempTexture, 0);
     }
 
+    int cameraWidth, cameraHeight;
+    void updateSize(){
+        if(cameraWidth == 0 && cameraHeight == 0) {
+            cameraWidth = CameraManager.getInstance().getCameraSize().getWidth();
+            cameraHeight = CameraManager.getInstance().getCameraSize().getHeight();
+        }
+    }
+
     public void onDraw(int width, int height) {
+        updateSize();
+
         int tempInTex = mTempTexture[0];
         int tempOutTex = mTempTexture[1];
         Filter head = mList.getFirst();
         if(head instanceof OES2RGBAFilter){
-            head.process(OESTexture, tempInTex);
+            head.process(OESTexture, tempInTex, this.cameraHeight, this.cameraWidth, this.cameraHeight, this.cameraWidth);
         }
 
         Filter currentFilter;
         if (head != null) {
             for (int i = 1; i < mList.size(); i++) {
                 currentFilter = mList.get(i);
-                currentFilter.process(tempInTex, tempOutTex);
+                if(currentFilter instanceof CropFilter){
+                    currentFilter.process(tempInTex, tempOutTex,this.cameraHeight, this.cameraWidth, width, height);
+                }else {
+                    currentFilter.process(tempInTex, tempOutTex, width, height, width, height);
+                }
                 tempInTex = tempOutTex;
             }
         }

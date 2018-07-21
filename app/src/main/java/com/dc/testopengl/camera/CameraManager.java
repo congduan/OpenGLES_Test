@@ -3,6 +3,7 @@ package com.dc.testopengl.camera;
 import android.app.Activity;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
+import android.util.Size;
 import android.view.Surface;
 
 import java.io.IOException;
@@ -51,6 +52,10 @@ public class CameraManager {
         for (CameraCallback cameraCallback : mCameraCallbacks) {
             cameraCallback.onOpened();
         }
+    }
+
+    public Size getCameraSize(){
+        return new Size(mCamera.getParameters().getPreviewSize().width, mCamera.getParameters().getPreviewSize().height);
     }
 
     public static void setCameraDisplayOrientation(Activity activity,

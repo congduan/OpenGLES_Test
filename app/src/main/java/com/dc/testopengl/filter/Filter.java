@@ -17,12 +17,6 @@ public abstract class Filter implements IGLResource{
     private int mVertexShader;
     private int mFragmentShader;
 
-    private int mInputWidth;
-    private int mInputHeight;
-
-    private int mOutputWidth;
-    private int mOutputHeight;
-
     private float[] mTransformMatrix;
 
     public void setTransformMatrix(float[] matrix){
@@ -35,43 +29,6 @@ public abstract class Filter implements IGLResource{
 
     public Filter(){
 
-    }
-
-    public Filter(int inputWidth, int inputHeight, int outputWidth, int outputHeight){
-        this.mInputWidth = inputWidth;
-        this.mInputHeight = inputHeight;
-        this.mOutputWidth = outputWidth;
-        this.mOutputHeight = outputHeight;
-    }
-
-    public Filter(Size inputSize, Size outputSize){
-        this.mInputWidth = inputSize.getWidth();
-        this.mInputHeight = inputSize.getHeight();
-        this.mOutputWidth = outputSize.getWidth();
-        this.mOutputHeight = outputSize.getHeight();
-    }
-
-    public void setSize(int inputWidth, int inputHeight, int outputWidth, int outputHeight){
-        this.mInputWidth = inputWidth;
-        this.mInputHeight = inputHeight;
-        this.mOutputWidth = outputWidth;
-        this.mOutputHeight = outputHeight;
-    }
-
-    public int getInputWidth() {
-        return mInputWidth;
-    }
-
-    public int getInputHeight() {
-        return mInputHeight;
-    }
-
-    public int getOutputHeight() {
-        return mOutputHeight;
-    }
-
-    public int getOutputWidth() {
-        return mOutputWidth;
     }
 
     public Filter(ShaderSource shader){
@@ -133,7 +90,6 @@ public abstract class Filter implements IGLResource{
         }
     }
 
-    public abstract void process(int inTex, int outTex);
     public abstract void process(int inTex, int outTex, int inputWidth, int inputHeight, int outputWidth, int outputHeight);
 
 }

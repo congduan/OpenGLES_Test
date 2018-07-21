@@ -2,7 +2,7 @@ package com.dc.testopengl.filter;
 
 import android.opengl.GLES20;
 
-import com.dc.testopengl.shader.PreviewShader;
+import com.dc.testopengl.shader.BaseShader;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -16,30 +16,24 @@ public class PreviewFilter extends Filter {
 
     //每行前两个值为顶点坐标，后两个为纹理坐标
     private static final float[] vertexData = {
-            1f,  1f,  1f,  1f,
-            -1f,  1f,  0f,  1f,
-            -1f, -1f,  0f,  0f,
-            1f,  1f,  1f,  1f,
-            -1f, -1f,  0f,  0f,
-            1f, -1f,  1f,  0f
+            1f, 1f, 1f, 1f,
+            -1f, 1f, 0f, 1f,
+            -1f, -1f, 0f, 0f,
+            1f, 1f, 1f, 1f,
+            -1f, -1f, 0f, 0f,
+            1f, -1f, 1f, 0f
     };
 
     private FloatBuffer mDataBuffer;
 
-    public PreviewFilter(int width, int height){
-        super(new PreviewShader());
-        setSize(width,height,width,height);
+    public PreviewFilter() {
+        super(new BaseShader());
     }
 
     @Override
-    public void init(){
+    public void init() {
         super.init();
         mDataBuffer = createBuffer(vertexData);
-    }
-
-    @Override
-    public void process(int inTex, int outTex) {
-        draw(inTex);
     }
 
     @Override
@@ -55,7 +49,7 @@ public class PreviewFilter extends Filter {
         return buffer;
     }
 
-    private void draw(int textureId){
+    private void draw(int textureId) {
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
 
         GLES20.glUseProgram(mShaderProgram);
