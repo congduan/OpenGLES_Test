@@ -1,10 +1,11 @@
 package com.dc.testopengl.filter;
 
+import android.graphics.Bitmap;
+import android.media.FaceDetector;
 import android.opengl.GLES20;
 
+import com.dc.testopengl.Utils;
 import com.dc.testopengl.camera.CameraManager;
-
-import java.util.LinkedList;
 
 /**
  * 滤镜链
@@ -14,34 +15,31 @@ import java.util.LinkedList;
 public class FilterChain {
 
     private int[] mTempTexture = new int[2];
-
-    private LinkedList<Filter> mList;
     private int OESTexture;
 
+    private FaceDetector mFaceDetector;
+    FaceDetector.Face[] faces = new FaceDetector.Face[1];
+
+    OES2RGBAFilter oes2RGBAFilter = new OES2RGBAFilter();
+    CropFilter cropFilter = new CropFilter();
+    PreviewFilter previewFilter = new PreviewFilter();
+
     public FilterChain() {
-        mList = new LinkedList<>();
-    }
-
-    public void add(Filter filter) {
-        mList.add(filter);
-    }
-
-    public void remove(Filter filter) {
-        mList.remove(filter);
     }
 
     public void glInit() {
         GLES20.glGenTextures(mTempTexture.length, mTempTexture, 0);
-        for (Filter filter : mList) {
-            filter.init();
-        }
+
+        oes2RGBAFilter.init();
+        cropFilter.init();
+        previewFilter.init();
     }
 
     public void glDestroy() {
-        for (Filter filter : mList) {
-            filter.destroy();
-        }
         GLES20.glDeleteTextures(mTempTexture.length, mTempTexture, 0);
+        oes2RGBAFilter.destroy();
+        cropFilter.destroy();
+        previewFilter.destroy();
     }
 
     int cameraWidth, cameraHeight;
@@ -54,25 +52,27 @@ public class FilterChain {
 
     public void onDraw(int width, int height) {
         updateSize();
+        initFaceDetector(width, height);
 
         int tempInTex = mTempTexture[0];
         int tempOutTex = mTempTexture[1];
-        Filter head = mList.getFirst();
-        if(head instanceof OES2RGBAFilter){
-            head.process(OESTexture, tempInTex, this.cameraHeight, this.cameraWidth, this.cameraHeight, this.cameraWidth);
-        }
+        oes2RGBAFilter.process(OESTexture, tempInTex, this.cameraHeight, this.cameraWidth, this.cameraHeight, this.cameraWidth);
+        cropFilter.process(tempInTex, tempOutTex,this.cameraHeight, this.cameraWidth, width, height);
 
-        Filter currentFilter;
-        if (head != null) {
-            for (int i = 1; i < mList.size(); i++) {
-                currentFilter = mList.get(i);
-                if(currentFilter instanceof CropFilter){
-                    currentFilter.process(tempInTex, tempOutTex,this.cameraHeight, this.cameraWidth, width, height);
-                }else {
-                    currentFilter.process(tempInTex, tempOutTex, width, height, width, height);
-                }
-                tempInTex = tempOutTex;
-            }
+//        Bitmap bitmap = Utils.saveTexture(tempOutTex, width, height);
+//        mFaceDetector.findFaces(bitmap, faces);
+//        bitmap.recycle();
+
+        previewFilter.process(tempOutTex, tempInTex, width, height, width, height);
+    }
+
+    public FaceDetector.Face[] getFaces(){
+        return faces;
+    }
+
+    private void initFaceDetector(int width, int height) {
+        if(mFaceDetector == null) {
+            mFaceDetector = new FaceDetector(width, height, 1);
         }
     }
 
@@ -104,5 +104,9 @@ public class FilterChain {
 
     public void setOESTexture(int OESTexture) {
         this.OESTexture = OESTexture;
+    }
+
+    public void setTransfromMatrix(float[] transfromMatrix) {
+        oes2RGBAFilter.setTransformMatrix(transfromMatrix);
     }
 }

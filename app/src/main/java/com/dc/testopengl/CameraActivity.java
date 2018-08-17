@@ -2,6 +2,7 @@ package com.dc.testopengl;
 
 import android.app.Activity;
 import android.graphics.SurfaceTexture;
+import android.media.FaceDetector;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.view.Window;
@@ -54,11 +55,11 @@ public class CameraActivity extends Activity {
             }
 
             @Override
-            public void onFpsUpdate(final float fps) {
+            public void onFpsUpdate(final float fps, final FaceDetector.Face[] faces) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        mFpsView.setText("fps: "+fps);
+                        mFpsView.setText("fps: "+fps + ", face="+(faces[0] == null));
                     }
                 });
             }

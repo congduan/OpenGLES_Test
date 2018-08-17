@@ -2,17 +2,12 @@ package com.dc.testopengl;
 
 import android.content.Context;
 import android.graphics.SurfaceTexture;
+import android.media.FaceDetector;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
-import android.opengl.Matrix;
-import android.provider.Settings;
 import android.util.Log;
-import android.util.Size;
-
-import com.dc.testopengl.camera.CameraManager;
 import com.dc.testopengl.filter.FilterChain;
-import com.dc.testopengl.filter.TestFilterChain;
 import com.dc.testopengl.test.Triangle;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -26,7 +21,7 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
 
     public interface SurfaceTextureInitCallback {
         void onInit(SurfaceTexture surfaceTexture);
-        void onFpsUpdate(float fps);
+        void onFpsUpdate(float fps, FaceDetector.Face[] faces);
     }
 
     private static final String TAG = "congduan";
@@ -69,7 +64,7 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
             Log.i(TAG, "onSurfaceCreated: glView is null");
         }
 
-        mFilterChain = new TestFilterChain();
+        mFilterChain = new FilterChain();
         mOESTextureId = createOESTextureObject();
         mFilterChain.glInit();
         initSurfaceTexture();
@@ -98,8 +93,8 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-        ((TestFilterChain) mFilterChain).setTransfromMatrix(mTransformMatrix);
-        ((TestFilterChain) mFilterChain).setOESTexture(mOESTextureId);
+        mFilterChain.setTransfromMatrix(mTransformMatrix);
+        mFilterChain.setOESTexture(mOESTextureId);
         mFilterChain.onDraw(width, height);
 
 
@@ -118,7 +113,7 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
         if(mFrameCount == FPS_FRAME_INTERVAL){
             mFps /= FPS_FRAME_INTERVAL;
             if(mCallback != null){
-                mCallback.onFpsUpdate(mFps);
+                mCallback.onFpsUpdate(mFps, mFilterChain.getFaces());
             }
             mFps = 0;
             mFrameCount = 0;

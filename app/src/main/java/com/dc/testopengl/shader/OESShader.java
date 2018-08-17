@@ -19,7 +19,8 @@ public class OESShader extends ShaderSource {
             "{\n" +
             //根据自己定义的纹理坐标和纹理矩阵求取传给片段着色器的纹理坐标
             "  vTextureCoord = (uTextureMatrix * aTextureCoordinate).xy;\n" +
-            "  gl_Position = aPosition;\n" +
+            " vec4 pos = vec4(aPosition.x, -aPosition.y, 0, 1);\n"+
+            "  gl_Position = pos;\n" +
             "}\n";
 
     private static final String FRAGMENT_SHADER = "" +
